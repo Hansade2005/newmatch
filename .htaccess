@@ -1,0 +1,16 @@
+# Enable mod_rewrite
+RewriteEngine On
+
+# Clean URL for login page
+RewriteRule ^admin-login$ /admin-login.html [L]
+
+# Clean URL for dashboard page
+RewriteRule ^admin-dashboard$ /admin-dashboard.html [L]
+
+# Redirect to login page if admin is not logged in
+RewriteCond %{REQUEST_URI} ^/admin-dashboard
+RewriteCond %{HTTP_COOKIE} !^.*adminLoggedIn=true.*$ [NC]
+RewriteRule ^.*$ /admin-login.html [L]
+
+# Handle 404 error
+ErrorDocument 404 /404.html
