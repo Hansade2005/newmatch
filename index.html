@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Coaching Survey</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f4f9;
+      font-family: Arial, sans-serif;
+    }
+    .card img {
+      max-height: 90px;
+      max-width: 100%;
+    }
+    .progress-bar {
+      height: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Wallet Guide Survey</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="login.html">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container mt-5">
+    <!-- Survey Section -->
+    <div id="survey-container">
+      <div class="progress">
+        <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%;"></div>
+      </div>
+      <h3 id="question-text" class="my-4"></h3>
+      <ul id="options-list" class="list-group mb-3"></ul>
+      <div class="d-flex justify-content-between">
+        <button id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+        <button id="next-btn" class="btn btn-primary">Next</button>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-container" style="display: none;">
+      <h3 class="text-center my-4">Recommended Coaches</h3>
+      <div class="row" id="coaches-list"></div>
+    </div>
+  </div>
+
+  <script>
+    // Default Coaches with attributes
+    const defaultCoaches = [
+      { "id": 1, "name": "Mr. James Carter", "pronouns": "they/them", "type": "General Money Coach", "expertise": ["Budgeting and Cash Flow Management", "Debt Management"], "ethnicity": "No Preference", "gender": "No Preference" },
+      { "id": 2, "name": "Dr. Brian Johnson", "pronouns": "he/him", "type": "Investment Coach", "expertise": ["Savings and Investing", "Retirement Planning"], "ethnicity": "No Preference", "gender": "Male" },
+      { "id": 3, "name": "Ms. Cynthia Lee", "pronouns": "she/her", "type": "Behavioral Money Coach", "expertise": ["Financial Goal Setting", "Behavioral Finance and Psychology"], "ethnicity": "Black", "gender": "Female" },
+      { "id": 4, "name": "Mr. David Kim", "pronouns": "he/him", "type": "Business Money Coach", "expertise": ["Debt Management", "Financial Literacy Education"], "ethnicity": "White", "gender": "Male" },
+      { "id": 5, "name": "Ms. Elena Garcia", "pronouns": "she/her", "type": "General Money Coach", "expertise": ["Retirement Planning", "Savings and Investing"], "ethnicity": "Latinx", "gender": "Female" },
+      { "id": 6, "name": "Dr. Fiona Chan", "pronouns": "she/her", "type": "Investment Coach", "expertise": ["Savings and Investing", "Retirement Planning"], "ethnicity": "Asian", "gender": "Female" },
+      { "id": 7, "name": "Mx. Gabriel Rivera", "pronouns": "they/them", "type": "Behavioral Money Coach", "expertise": ["Behavioral Finance and Psychology", "Financial Literacy Education"], "ethnicity": "No Preference", "gender": "Non-binary" },
+      { "id": 8, "name": "Mr. Henry Adams", "pronouns": "he/him", "type": "General Money Coach", "expertise": ["Home ownership", "Building wealth"], "ethnicity": "Black", "gender": "Male" },
+      { "id": 9, "name": "Dr. Samantha Wong", "pronouns": "she/her", "type": "Behavioral Money Coach", "expertise": ["Behavioral Finance and Psychology", "Financial Literacy Education"], "ethnicity": "Asian", "gender": "Female" },
+      { "id": 10, "name": "Ms. Rachel Green", "pronouns": "she/her", "type": "General Money Coach", "expertise": ["Budgeting and Cash Flow Management", "Debt Management"], "ethnicity": "White", "gender": "Female" }
+    ];
+
+    // Save coaches to localStorage
+    localStorage.setItem("coaches", JSON.stringify(defaultCoaches));
+
+    // Survey Questions
+    const questions = [
+      { text: "What financial goals would you like to see first accomplished?", options: ["Paying off debt", "Saving", "Home ownership", "Building wealth", "Taking care of family", "Retirement"] },
+      { text: "What is your annual income?", options: ["Below $40,000", "$40,000 - $60,000", "$60,000 - $80,000", "$80,000 - $100,000", "$100,000+", "Prefer not to say"] },
+      { text: "Are you covered in the event of a catastrophe, emergency, or lawsuit?", options: ["Yes", "No"] },
+      { text: "What is your definition of financial success?", options: ["Plenty of money", "Establishing generational wealth", "Being debt-free", "Retiring early", "Having options in life"] },
+      { text: "What is your main financial concern?", options: ["Paying off debt", "Saving", "Home ownership", "Building wealth", "Taking care of family", "Retirement", "Creating a spending plan"] },
+      { text: "Do you have a financial budget?", options: ["Yes", "No", "Sort of"] },
+      { text: "What type of coach are you looking for?", options: ["General Money Coach", "Business Money Coach", "Investment Coach", "Behavioral Money Coach"] },
+      { text: "What expertise are you looking for? (Select all that apply)", options: ["Budgeting and Cash Flow Management", "Debt Management", "Savings and Investing", "Financial Goal Setting", "Financial Literacy Education", "Behavioral Finance and Psychology", "Retirement Planning"] },
+      { text: "What ethnicity would you like your coach to be?", options: ["White", "Black", "Asian", "Latinx", "No Preference", "Other"] },
+      { text: "What gender would you like your coach to be?", options: ["Male", "Female", "Non-binary", "LGBTQ+", "No Preference"] },
+      { text: "What is your current marital status?", options: ["Married", "Widowed", "Divorced", "Separated", "Never Married"] },
+      { text: "How many children are you a parent or guardian for that live in your household (17 or younger only)?", options: ["None", "1", "2", "3", "4", "More than 4"] }
+    ];
+
+    let currentStep = 0;
+    const responses = [];
+
+    // Load the current question
+    function loadQuestion() {
+      const question = questions[currentStep];
+      document.getElementById("question-text").innerText = question.text;
+      const optionsList = document.getElementById("options-list");
+      optionsList.innerHTML = "";
+      question.options.forEach((option, index) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = `<input type="radio" name="response" id="option${index}" value="${option}" class="form-check-input me-2">
+                        <label for="option${index}" class="form-check-label">${option}</label>`;
+        optionsList.appendChild(li);
+      });
+      document.getElementById("prev-btn").disabled = currentStep === 0;
+      document.getElementById("next-btn").innerText = currentStep === questions.length - 1 ? "Submit" : "Next";
+      updateProgress();
+    }
+
+    // Update progress bar
+    function updateProgress() {
+      const progress = ((currentStep + 1) / questions.length) * 100;
+      document.getElementById("progress-bar").style.width = progress + "%";
+    }
+
+    // Handle Next Button Click
+    document.getElementById("next-btn").addEventListener("click", function() {
+      const selectedOption = document.querySelector('input[name="response"]:checked');
+      if (selectedOption) {
+        responses[currentStep] = selectedOption.value;
+        currentStep++;
+        if (currentStep === questions.length) {
+          showResults();
+        } else {
+          loadQuestion();
+        }
+      } else {
+        alert("Please select an answer before proceeding.");
+      }
+    });
+
+    // Handle Previous Button Click
+    document.getElementById("prev-btn").addEventListener("click", function() {
+      currentStep--;
+      loadQuestion();
+    });
+
+    // Show results based on responses
+// Show results based on responses
+function showResults() {
+  document.getElementById("survey-container").style.display = "none";
+  document.getElementById("results-container").style.display = "block";
+  
+  // Get the coaches data from localStorage
+  const coaches = JSON.parse(localStorage.getItem("coaches"));
+
+  // Randomly select 5 coaches from the list
+  const randomCoaches = [];
+  const usedIndexes = new Set(); // To avoid selecting the same coach twice
+  while (randomCoaches.length < 5) {
+    const randomIndex = Math.floor(Math.random() * coaches.length);
+    if (!usedIndexes.has(randomIndex)) {
+      usedIndexes.add(randomIndex);
+      randomCoaches.push(coaches[randomIndex]);
+    }
+  }
+
+  const coachesList = document.getElementById("coaches-list");
+  coachesList.innerHTML = ""; 
+
+  // Display the selected random coaches
+  if (randomCoaches.length > 0) {
+    randomCoaches.forEach(coach => {
+      const coachCard = document.createElement("div");
+      coachCard.className = "col-md-4";
+      coachCard.innerHTML = `
+        <div class="card">
+          <img src="https://cdn-icons-png.flaticon.com/128/4140/4140037.png" alt="${coach.name}">
+          <div class="card-body">
+            <h5 class="card-title">${coach.name}</h5>
+            <p class="card-text">${coach.type}</p>
+            <p class="card-text">Pronouns: ${coach.pronouns}</p>
+            <!-- Book Now Button -->
+            <button class="btn btn-primary" onclick="bookCoach(${coach.id})">Book Now</button>
+          </div>
+        </div>
+      `;
+      coachesList.appendChild(coachCard);
+    });
+  } else {
+    coachesList.innerHTML = "<p>No coaches match your criteria.</p>";
+  }
+}
+
+// Save the selected coach's ID to localStorage and redirect to booking page
+function bookCoach(coachId) {
+  localStorage.setItem('selectedCoachId', coachId);
+  window.location.href = 'booking.html'; // Redirect to the booking page
+}
+
+    loadQuestion();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

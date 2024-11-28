@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Coach - Wallet Guide Survey</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    // Function to load the selected coach from localStorage
+    function loadCoach() {
+      const coachId = localStorage.getItem('selectedCoachId');
+      const coaches = JSON.parse(localStorage.getItem('coaches')) || [];
+      const coach = coaches.find(c => c.id == coachId);
+
+      if (coach) {
+        document.getElementById('coach-name').innerText = coach.name;
+        document.getElementById('coach-type').innerText = coach.type;
+        document.getElementById('coach-expertise').innerText = coach.expertise.join(', ');
+      } else {
+        document.getElementById('booking-form').innerHTML = '<p>No coach selected for booking.</p>';
+      }
+    }
+
+    // Function to handle booking
+    function bookCoach() {
+      const bookingDate = document.getElementById('booking-date').value;
+      const bookingTime = document.getElementById('booking-time').value;
+      const coachId = localStorage.getItem('selectedCoachId');
+      const coaches = JSON.parse(localStorage.getItem('coaches')) || [];
+      const coach = coaches.find(c => c.id == coachId);
+
+      if (coach && bookingDate && bookingTime) {
+        const booking = {
+          coachId: coach.id,
+          coachName: coach.name,
+          date: bookingDate,
+          time: bookingTime
+        };
+
+        // Save booking to localStorage
+        let bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+        bookings.push(booking);
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+
+        // Show booking confirmation
+        document.getElementById('confirmation').innerHTML = `
+          <h4>Booking Confirmed!</h4>
+          <p>You have successfully booked <strong>${coach.name}</strong> on <strong>${bookingDate}</strong> at <strong>${bookingTime}</strong>.</p>
+        `;
+      } else {
+        alert('Please select a valid date and time for your booking.');
+      }
+    }
+
+    // Load coach info when page loads
+    window.onload = loadCoach;
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="#">Wallet Guide Survey</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="login.html">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Booking Form -->
+  <div class="container mt-5">
+    <h2 class="text-center">Book Your Coach</h2>
+
+    <!-- Coach Information -->
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Coach: <span id="coach-name">Loading...</span></h5>
+        <p><strong>Type:</strong> <span id="coach-type">Loading...</span></p>
+        <p><strong>Expertise:</strong> <span id="coach-expertise">Loading...</span></p>
+      </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div id="booking-form" class="mt-4">
+      <div class="mb-3">
+        <label for="booking-date" class="form-label">Select Booking Date</label>
+        <input type="date" class="form-control" id="booking-date" required>
+      </div>
+      <div class="mb-3">
+        <label for="booking-time" class="form-label">Select Booking Time</label>
+        <input type="time" class="form-control" id="booking-time" required>
+      </div>
+      <button class="btn btn-primary w-100" onclick="bookCoach()">Book Now</button>
+    </div>
+
+    <!-- Booking Confirmation -->
+    <div id="confirmation" class="mt-4"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
